@@ -72,7 +72,7 @@ const TableHeader: React.FC = () => {
     return (
         <Wrapper>
             <div>
-                <input style={{ display: 'none' }} ref={inputRef} type="file" onChange={handleOnChange} />
+                <input style={{ display: 'none' }} ref={inputRef} type="file" accept=".csv" onChange={handleOnChange} />
                 <ButtonExport onClick={handleClick} icon={<UploadOutlined />}>
                     Import
                 </ButtonExport>
