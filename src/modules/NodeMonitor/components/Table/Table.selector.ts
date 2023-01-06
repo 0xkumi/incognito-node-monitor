@@ -9,3 +9,4 @@ export const tableSelector = createSelector(
 
 export const searchSelector = createSelector(tableSelector, (table) => table.search);
 export const listNodeSelector = createSelector(tableSelector, (table) => table.listNode);
+export const rowsPerPageSelector = createSelector(tableSelector, (table) => table.rowsPerPage);

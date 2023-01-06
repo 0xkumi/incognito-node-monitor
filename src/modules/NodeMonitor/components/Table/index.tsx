@@ -1,13 +1,15 @@
-import React from 'react';
+import { Table } from 'antd';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import SearchRow from 'src/modules/NodeMonitor/components/SearchRow';
 import { Styled } from 'src/modules/NodeMonitor/components/Table/styled';
 import withTable from 'src/modules/NodeMonitor/components/Table/Table.enhance';
 import { ITableData } from 'src/modules/NodeMonitor/components/Table/Table.interface';
-import SearchRow from 'src/modules/NodeMonitor/components/SearchRow';
-import { Table } from 'antd';
 import { getColumnsNodeMonitor } from 'src/modules/NodeMonitor/NodeMonitor.data';
-import { useDispatch } from 'react-redux';
 import MonitorDetailModal from '../MonitorDetail/components/MonitorDetailModal';
-import { actionDeleteNode } from './Table.actions';
+import RowPerPage from '../RowPerPage';
+import TableHeader from '../TableHeader';
+import { actionChangeRowsPerPage, actionDeleteNode } from './Table.actions';
 
 export interface ITableNodeProps {
     data: ITableData[];
@@ -33,9 +35,16 @@ const TableNodeMonitor = (props: ITableNodeProps & any) => {
         handleChangePage,
         handleClickTableCell,
         handleCloseMonitorModal,
+        handleFetchData,
     } = props;
 
     const dispatch = useDispatch();
+
+    const [dataTable, setDataTable] = useState<any>(data);
+
+    React.useEffect(() => {
+        setDataTable(data);
+    }, [data]);
 
     const onChangePage = (page: number) => handleChangePage && handleChangePage(page);
 
@@ -54,13 +63,21 @@ const TableNodeMonitor = (props: ITableNodeProps & any) => {
         },
     });
 
+    const handleChange = async (value: number) => {
+        console.log(`selected ${value}`);
+        await dispatch(actionChangeRowsPerPage({ rowsPerPage: value }));
+        await handleFetchData(0);
+    };
+
     return (
         <Styled>
+            <TableHeader />
             <SearchRow />
+            <RowPerPage handleChange={handleChange} />
             <div className="card">
                 <Table
                     columns={columns}
-                    dataSource={data}
+                    dataSource={dataTable}
                     loading={!!fetching}
                     pagination={{
                         current: currentPage + 1,

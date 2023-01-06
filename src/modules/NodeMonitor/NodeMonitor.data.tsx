@@ -136,11 +136,13 @@ const DEFAULT_COLUMN_TABLE_MONITOR: any = [
                 </div>
             );
         },
+        sorter: (a: any, b: any) => a.status.localeCompare(b.status),
     },
     {
         dataIndex: TableMonitorKey.syncState.key,
         title: TableMonitorKey.syncState.title,
         key: TableMonitorKey.syncState.key,
+        sorter: (a: any, b: any) => a.syncState.localeCompare(b.syncState),
     },
     {
         dataIndex: TableMonitorKey.voteStats.key,
