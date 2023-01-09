@@ -69,6 +69,16 @@ const TableHeader: React.FC = () => {
         inputRef?.current?.click();
     };
 
+    const getCsvFileName = () => {
+        const date = new Date();
+        const d = date.getDate();
+        const m = date.getMonth() + 1;
+        const y = date.getFullYear();
+        const dateString = `${y}_${m <= 9 ? `0${m}` : m}_${d <= 9 ? `0${d}` : d}`;
+        const fileName = `incognito_node_${dateString}`;
+        return fileName;
+    };
+
     return (
         <Wrapper>
             <div>
@@ -77,7 +87,7 @@ const TableHeader: React.FC = () => {
                     Import
                 </ButtonExport>
             </div>
-            <CSVLink data={listNode} headers={headers}>
+            <CSVLink data={listNode} headers={headers} filename={getCsvFileName()}>
                 <ButtonExport icon={<DownloadOutlined />}>Export</ButtonExport>
             </CSVLink>
         </Wrapper>
