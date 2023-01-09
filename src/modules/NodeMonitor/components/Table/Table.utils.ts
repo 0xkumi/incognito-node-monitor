@@ -48,6 +48,14 @@ export const getParamsNodesInfo = (nodes: INodeName[], currentPage: number, rowP
     };
 };
 
+export const getNodeByPage = (nodes: any[], currentPage: number, rowPerPage: number) => {
+    const startIndex = currentPage * rowPerPage;
+    const endIndex = startIndex + rowPerPage;
+    let listNodes = nodes || [];
+    listNodes = listNodes.slice(startIndex, endIndex);
+    return listNodes;
+};
+
 export const getMiningPublicKey = () => {
     let mpk = '';
     try {

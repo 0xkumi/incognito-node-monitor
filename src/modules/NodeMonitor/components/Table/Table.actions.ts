@@ -10,7 +10,7 @@ import {
     ACTION_CHANGE_VISIBLE_MODAL,
 } from './Table.actionsName';
 import { INodeName, ITableData } from './Table.interface';
-import { getParamsNodesInfo } from './Table.utils';
+import { getNodeByPage, getParamsNodesInfo } from './Table.utils';
 import { getListNodesInfo } from './Table.services';
 import { NodesListBuilder } from './Table.builder';
 
@@ -45,18 +45,53 @@ export const actionUpdateSearchValue = (payload: { search: string }) => ({
     payload,
 });
 
-export const actionFetchTableData = (page: number, newListNode?: INodeName[]) => async (
-    dispatch: Dispatch,
-    getState: () => IRootState,
-) => {
+export const actionFetchTableData = ({
+    page,
+    newListNode,
+    sortStatus,
+    sortSyncState,
+}: {
+    page: number;
+    newListNode?: INodeName[];
+    sortStatus?: 'Online' | 'Offline' | null;
+    sortSyncState?: 'Latest' | 'Unknown' | null;
+}) => async (dispatch: Dispatch, getState: () => IRootState) => {
     try {
         const { rowsPerPage, fetching, listNode } = getState().table;
         if (fetching) return;
-        const allNodes = (!isEmpty(newListNode) ? newListNode : listNode) || [];
-        const { strKeys, mapper, totalRows } = getParamsNodesInfo(allNodes, page, rowsPerPage);
-        dispatch(actionFetchingTableData({ fetching: true }));
+        let allNodes = (!isEmpty(newListNode) ? newListNode : listNode) || [];
+        // const { strKeys, mapper, totalRows } = getParamsNodesInfo(allNodes, page, rowsPerPage);
+
+        // get data of all nodes;
+        let { strKeys, mapper, totalRows } = getParamsNodesInfo(allNodes, 0, allNodes?.length);
+
+        await dispatch(actionFetchingTableData({ fetching: true }));
         const nodes = NodesListBuilder(await getListNodesInfo(strKeys), mapper);
-        dispatch(actionUpdateTableData({ data: nodes, currentPage: page, limitPage: totalRows, listNode: allNodes }));
+
+        let newNodes = nodes;
+        const nodesOnline = nodes?.filter((node) => node?.status === 'Online');
+        const nodesOffline = nodes?.filter((node) => node?.status === 'Offline');
+        const nodesUnknown = nodes?.filter((node) => node?.status !== 'Online' && node?.status !== 'Offline');
+        if (sortStatus === 'Online') {
+            newNodes = [...nodesOnline, ...nodesOffline, ...nodesUnknown];
+        } else if (sortStatus === 'Offline') {
+            newNodes = [...nodesOffline, ...nodesOnline, ...nodesUnknown];
+        }
+
+        const nodesSyncLatest = nodes?.filter((node) => node?.syncState === 'Latest');
+        const nodesSyncUnLatest = nodes?.filter((node) => node?.syncState !== 'Latest');
+
+        if (sortSyncState === 'Latest') {
+            newNodes = [...nodesSyncLatest, ...nodesSyncUnLatest];
+        } else if (sortSyncState === 'Unknown') {
+            newNodes = [...nodesSyncUnLatest, ...nodesSyncLatest];
+        }
+
+        newNodes = getNodeByPage(newNodes, page, rowsPerPage);
+
+        dispatch(
+            actionUpdateTableData({ data: newNodes, currentPage: page, limitPage: totalRows, listNode: allNodes }),
+        );
     } catch (e) {
         console.debug('Fetch table data with error: ', e);
     } finally {
@@ -66,7 +101,7 @@ export const actionFetchTableData = (page: number, newListNode?: INodeName[]) =>
 
 export const actionSubmitSearch = (newListNode: INodeName[]) => (dispatch: Dispatch, getState: () => IRootState) => {
     try {
-        actionFetchTableData(0, newListNode)(dispatch, getState);
+        actionFetchTableData({ page: 0, newListNode })(dispatch, getState);
     } catch (e) {
         console.debug('Clear search error', e);
     }
@@ -74,7 +109,7 @@ export const actionSubmitSearch = (newListNode: INodeName[]) => (dispatch: Dispa
 
 export const actionChangePage = (page: number) => (dispatch: Dispatch, getState: () => IRootState) => {
     try {
-        actionFetchTableData(page)(dispatch, getState);
+        actionFetchTableData({ page })(dispatch, getState);
     } catch (e) {
         console.debug('Clear search error', e);
     }

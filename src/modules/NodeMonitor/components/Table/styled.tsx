@@ -21,6 +21,13 @@ export const Styled = styled.div`
         text-align: center;
         font-weight: 600;
     }
+    .sortTitle {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
 `;
 
 export const ModalWrapper = styled.div`

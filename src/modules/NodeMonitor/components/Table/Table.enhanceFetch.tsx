@@ -9,7 +9,7 @@ interface IProps {
 
 const withFetch = (WrappedComponent: React.FunctionComponent) => (props: IProps & any) => {
     const dispatch = useDispatch();
-    const handleFetchData = async (page: number) => dispatch(actionFetchTableData(page));
+    const handleFetchData = async (page: number) => dispatch(actionFetchTableData({ page }));
 
     const firstTimeFetchData = () => handleFetchData(0);
 
