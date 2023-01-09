@@ -84,7 +84,7 @@ const TableNodeMonitor = (props: ITableNodeProps & any) => {
         }
     }, [sortSyncState]);
 
-    const onChangePage = (page: number) => handleChangePage && handleChangePage(page);
+    const onChangePage = (page: number) => sortListNodeByStatus(page);
 
     const onClickTableCell = (item: ITableData) => {
         if (!item) return;
