@@ -1,4 +1,4 @@
-import { Button, Row, Table } from 'antd';
+import { Button, Row, Space, Table } from 'antd';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { FaSortDown, FaSortUp } from 'react-icons/fa';
@@ -13,6 +13,8 @@ import { ITableData } from 'src/modules/NodeMonitor/components/Table/Table.inter
 import { TableMonitorKey } from 'src/modules/NodeMonitor/NodeMonitor.data';
 import { ellipsisRight } from 'src/utils/ellipsis';
 import MonitorDetailModal from '../MonitorDetail/components/MonitorDetailModal';
+import QrCodeModal from '../MonitorDetail/components/QrCodeModal';
+import { actionUpdateMonitorDetail } from '../MonitorDetail/MonitorDetail.actions';
 import RowPerPage from '../RowPerPage';
 import TableHeader from '../TableHeader';
 import {
@@ -57,6 +59,9 @@ const TableNodeMonitor = (props: ITableNodeProps & any) => {
     const [sortStatus, setSortStatus] = useState<any>(null);
     const [sortSyncState, setSortSyncState] = useState<any>(null);
     const [sortBy, setSortBy] = useState<'status' | 'syncState' | null>(null);
+
+    const [modalQrVisible, setModalQrVisible] = useState<boolean>(false);
+    const [action, setAction] = useState<'stake' | 'unStake' | null>(null);
 
     React.useEffect(() => {
         setDataTable(data);
@@ -237,14 +242,44 @@ const TableNodeMonitor = (props: ITableNodeProps & any) => {
             dataIndex: TableMonitorKey.delete.key,
             key: TableMonitorKey.delete.key,
             render: (text: any, record: any) => (
-                <Button
-                    onClick={(e: any) => {
-                        e.stopPropagation();
-                        dispatch(actionDeleteNode(record));
-                    }}
-                >
-                    <TrashIcon />
-                </Button>
+                <Space size="small">
+                    <Button
+                        type="link"
+                        block
+                        disabled={record.role !== 'Not stake'}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setAction('stake');
+                            dispatch(actionUpdateMonitorDetail({ node: record }));
+                            setModalQrVisible(true);
+                        }}
+                    >
+                        Stake
+                    </Button>
+                    <Button
+                        type="link"
+                        block
+                        disabled={record.role === 'Not stake'}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setAction('unStake');
+                            dispatch(actionUpdateMonitorDetail({ node: record }));
+                            setModalQrVisible(true);
+                        }}
+                    >
+                        UnStake
+                    </Button>
+                    <Button
+                        type="link"
+                        danger
+                        onClick={(e: any) => {
+                            e.stopPropagation();
+                            dispatch(actionDeleteNode(record));
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </Space>
             ),
         },
     ];
@@ -293,6 +328,14 @@ const TableNodeMonitor = (props: ITableNodeProps & any) => {
                 />
             </div>
             <MonitorDetailModal visible={visibleModal} onClose={onCloseModal} />
+            <QrCodeModal
+                visible={modalQrVisible}
+                onClose={() => {
+                    setAction(null);
+                    setModalQrVisible(false);
+                }}
+                action={action}
+            />
         </Styled>
     );
 };
