@@ -58,6 +58,7 @@ export const HeaderTabs: ItemSelectedProps[] = [
     { title: 'Inactive nodes', key: '/red-list' },
     { title: 'User guide', link: 'https://we.incognito.org/t/how-to-use-the-node-monitor/11684' },
     { title: 'FAQs', link: 'https://incognito.org/faq' },
+    { title: 'Beacon committee state', key: '/committee-state' },
 ];
 
 const Header = React.memo(() => {
